@@ -468,6 +468,31 @@ test("url returns the string the parser validated", () => {
   expect(z.url({ normalize: true }).parse("https://exa\nmple.com")).toBe("https://example.com/");
 });
 
+test("cidrv6 requires an integer prefix length", () => {
+  for (const schema of [z.cidrv6(), z.string().cidrv6()]) {
+    for (const prefix of ["0", "64", "128"]) {
+      expect(schema.safeParse(`2001:db8::/${prefix}`).success).toBe(true);
+    }
+    for (const prefix of [
+      "64.5",
+      "0.1",
+      "127.9",
+      "NaN",
+      "64.0",
+      "6.4e1",
+      "+64",
+      " 64",
+      "64 ",
+      "064",
+      "",
+      "-1",
+      "129",
+    ]) {
+      expect(schema.safeParse(`2001:db8::/${prefix}`).success).toBe(false);
+    }
+  }
+});
+
 test("ipv6 and cidrv6 reject anything outside the address alphabet", () => {
   // `new URL("http://[...]")` parses an authority rather than an address, so a delimiter re-splits it and the parser validates something else entirely.
   expect(z.ipv6().safeParse("::@1\\").success).toBe(false); // used to validate against the host 0.0.0.1

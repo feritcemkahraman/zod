@@ -1332,6 +1332,8 @@ test("cidrv6 compiled validates prefix range and address", () => {
   expect(valid(aot, "::1/128")).toBe("::1/128");
   invalid(aot, "::1/129");
   invalid(aot, "::1/-1");
+  invalid(aot, "::1/64.5");
+  expectMatch(z.cidrv6(), "::1/64.5");
   invalid(aot, "not-an-address/64");
   invalid(aot, "::1");
   expectMatch(z.cidrv6(), "::1/129");
